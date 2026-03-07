@@ -1,12 +1,10 @@
+import "dotenv/config";
 import express, { type Request, type Response } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import shareRoutes from "./routes/shareRoutes.js";
-
-dotenv.config();
 
 const app = express();
 
