@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -20,30 +19,36 @@ model User {
   password  String
   createdAt DateTime @default(now())
 
-  notes     Note[]
+  notes Note[]
 }
 
 model Note {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  imageUrl  String?
-  isPublic  Boolean  @default(false)
-  shareId   String?  @unique
+  id       String  @id @default(uuid())
+  title    String
+  content  String
+  imageUrl String?
+  isPublic Boolean @default(false)
+  shareId  String? @unique
 
   createdAt DateTime @default(now())
 
   userId String
-  user   User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   tags NoteTag[]
+
+  @@index([userId])
+  @@index([shareId])
 }
 
 model Tag {
   id   String @id @default(uuid())
-  name String @unique
+  name String
+  slug String @unique
 
   notes NoteTag[]
+
+  @@index([slug])
 }
 
 model NoteTag {
