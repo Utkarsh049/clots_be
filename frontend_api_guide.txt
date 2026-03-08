@@ -1,0 +1,198 @@
+# Frontend API Documentation
+
+This document describes the API endpoints and the expected request/response schemas for the Clots application to help with frontend development and AI prompting.
+
+## 1. Authentication
+Base Path: `/auth`
+
+### 1.1 Signup (`POST /auth/signup`)
+- **Request Body (JSON):**
+  ```json
+  {
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "password": "strongPassword123"
+  }
+  ```
+- **Success Response (201 Created):**
+  ```json
+  {
+    "message": "User created successfully",
+    "token": "eyJhbGci...<jwt_token>",
+    "user": {
+      "id": "uuid-string",
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "createdAt": "2024-03-07T10:00:00.000Z"
+    }
+  }
+  ```
+- **Error Responses:** 
+  - `400 Bad Request` (Missing fields)
+  - `409 Conflict` (Email already in use)
+
+### 1.2 Login (`POST /auth/login`)
+- **Request Body (JSON):**
+  ```json
+  {
+    "email": "jane@example.com",
+    "password": "strongPassword123"
+  }
+  ```
+- **Success Response (200 OK):**
+  ```json
+  {
+    "message": "Login successful",
+    "token": "eyJhbGci...<jwt_token>",
+    "user": {
+      "id": "uuid-string",
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "createdAt": "2024-03-07T10:00:00.000Z"
+    }
+  }
+  ```
+- **Error Responses:**
+  - `400 Bad Request` (Missing fields)
+  - `401 Unauthorized` (Invalid credentials)
+
+---
+
+## 2. Notes
+Base Path: `/notes`
+**Authorization:** All Note endpoints (except public view) require `Authorization: Bearer <token>`
+
+### Note Schema (Response Object)
+Whenever a single Note is returned (create, get by id, update), it will have this shape:
+```json
+{
+  "id": "note-uuid",
+  "title": "My Note Title",
+  "content": "The actual text content of the note",
+  "imageUrl": "https://s3.amazonaws.com/bucket/image.jpg", // or null 
+  "isPublic": false,
+  "shareId": "uuid-or-null", 
+  "userId": "user-uuid",
+  "createdAt": "2024-03-07T10:00:00.000Z",
+  "tags": [
+    {
+      "noteId": "note-uuid",
+      "tagId": "tag-uuid",
+      "tag": {
+        "id": "tag-uuid",
+        "name": "React",
+        "slug": "react"
+      }
+    }
+  ]
+}
+```
+
+### 2.1 Get All Notes (`GET /notes`)
+*Supports Pagination via query params: `?page=1&limit=10`*
+- **Success Response (200 OK):**
+  ```json
+  {
+    "notes": [ /* Array of Note Objects */ ],
+    "page": 1,
+    "limit": 10,
+    "total": 42
+  }
+  ```
+
+### 2.2 Get Note by ID (`GET /notes/:id`)
+- **Success Response (200 OK):** Returns the Note Object JSON.
+- **Error Response:** `404 Not Found`
+
+### 2.3 Create Note (`POST /notes`)
+- **Request Body (JSON):**
+  ```json
+  {
+    "title": "My Note Title",
+    "content": "The actual text content of the note",
+    "imageUrl": "https://...", // Optional
+    "tags": ["React", "Typescript", "frontend"] // Optional
+  }
+  ```
+- **Success Response (201 Created):** Returns the structured Note Object JSON you just created.
+
+### 2.4 Update Note (`PUT /notes/:id`)
+- **Request Body (JSON):** Any field is optional
+  ```json
+  {
+    "title": "Updated Title",
+    "content": "Updated content",
+    "imageUrl": "https://...", // Optional
+    "tags": ["React", "New Tag"] // Replaces old tags completely
+  }
+  ```
+- **Success Response (200 OK):** Returns the updated Note Object JSON.
+
+### 2.5 Delete Note (`DELETE /notes/:id`)
+- **Success Response (200 OK):**
+  ```json
+  { "message": "Note deleted successfully" }
+  ```
+
+---
+
+## 3. Search & Tags (Under Notes)
+**Authorization:** Requires `Authorization: Bearer <token>`
+
+### 3.1 Search Notes (`GET /notes/search?query=react`)
+Returns notes where the query string matches the title, content, or any tag name.
+- **Success Response (200 OK):**
+  `[ /* Array of Note Objects */ ]`
+
+### 3.2 Get Notes by Tag Slug (`GET /notes/tag/:slug`)
+E.g., `GET /notes/tag/react` (the slug is the lowercase version of the tag name)
+- **Success Response (200 OK):**
+  `[ /* Array of Note Objects */ ]`
+
+---
+
+## 4. Note Sharing
+Base Path: `/share` | `/notes/:id/share`
+
+### 4.1 Enable Sharing (`POST /notes/:id/share`)
+*(Requires Auth)*
+- **Success Response (200 OK):**
+  ```json
+  {
+    "message": "Note visibility updated",
+    "note": { ... Note Object ..., "isPublic": true, "shareId": "public-uuid-string" }
+  }
+  ```
+
+### 4.2 Disable Sharing (`DELETE /notes/:id/share`)
+*(Requires Auth)*
+- **Success Response (200 OK):**
+  ```json
+  {
+    "message": "Note visibility updated",
+    "note": { ... Note Object ..., "isPublic": false }
+  }
+  ```
+
+### 4.3 View Shared Note (`GET /share/:shareId`)
+*(NO Auth Required! Use the `shareId`, NOT the `id`)*
+- **Success Response (200 OK):** Returns the Note Object JSON.
+- **Error Response:** `404 Not Found` (if note doesn't exist or is not public)
+
+---
+
+## 5. File Uploads
+Base Path: `/upload`
+**Authorization:** Requires `Authorization: Bearer <token>`
+
+### 5.1 Upload Image (`POST /upload`)
+- **Request Format:** `multipart/form-data`
+- **Body Form Field:** `image` (The actual File blob)
+- **Success Response (200 OK):**
+  ```json
+  {
+    "message": "Image uploaded successfully",
+    "imageUrl": "https://clots-images.s3.ap-south-1.amazonaws.com/123456789-image.jpg"
+  }
+  ```
+*(You can use this `imageUrl` when creating/updating a Note)*

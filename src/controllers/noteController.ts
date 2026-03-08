@@ -5,6 +5,7 @@ import {
   createNoteSchema,
   updateNoteSchema,
 } from "../validation/noteValidation.js";
+import logger from "../utils/logger.js";
 
 export const createNote = async (
   req: AuthRequest,
@@ -41,7 +42,7 @@ export const createNote = async (
 
     res.status(201).json(note);
   } catch (error) {
-    console.error("Create note error:", error);
+    logger.error(error, "Create note error");
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -68,7 +69,7 @@ export const getNotes = async (
     );
     res.status(200).json(result);
   } catch (error) {
-    console.error("Get notes error:", error);
+    logger.error(error, "Get notes error");
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -95,7 +96,7 @@ export const getNote = async (
 
     res.status(200).json(note);
   } catch (error) {
-    console.error("Get note error:", error);
+    logger.error(error, "Get note error");
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -142,7 +143,7 @@ export const updateNote = async (
 
     res.status(200).json(note);
   } catch (error) {
-    console.error("Update note error:", error);
+    logger.error(error, "Update note error");
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -171,7 +172,7 @@ export const deleteNote = async (
 
     res.status(204).send(); // 204 No Content for successful deletion
   } catch (error) {
-    console.error("Delete note error:", error);
+    logger.error(error, "Delete note error");
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -197,7 +198,7 @@ export const searchNotes = async (
     const notes = await noteService.searchNotes(userId, query);
     res.status(200).json(notes);
   } catch (error) {
-    console.error("Search notes error:", error);
+    logger.error(error, "Search notes error");
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -218,7 +219,7 @@ export const getNotesByTag = async (
     const notes = await noteService.getNotesByTag(userId, slug as string);
     res.status(200).json(notes);
   } catch (error) {
-    console.error("Get notes by tag error:", error);
+    logger.error(error, "Get notes by tag error");
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -254,7 +255,7 @@ export const toggleShare = async (
 
     res.status(200).json(note);
   } catch (error) {
-    console.error("Toggle share error:", error);
+    logger.error(error, "Toggle share error");
     res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -1,16 +1,21 @@
 import type { Request, Response } from "express";
 import * as authService from "../services/authService.js";
+import { signupSchema, loginSchema } from "../validation/authValidation.js";
+import logger from "../utils/logger.js";
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password } = req.body;
+    const parsedParams = signupSchema.safeParse(req.body);
 
-    if (!name || !email || !password) {
-      res
-        .status(400)
-        .json({ error: "Name, email, and password are required." });
+    if (!parsedParams.success) {
+      res.status(400).json({
+        error: "Validation error",
+        details: parsedParams.error.format(),
+      });
       return;
     }
+
+    const { name, email, password } = parsedParams.data;
 
     const existingUser = await authService.findUserByEmail(email);
     if (existingUser) {
@@ -33,19 +38,24 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error) {
-    console.error("Signup error:", error);
+    logger.error(error, "Signup failed");
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const parsedParams = loginSchema.safeParse(req.body);
 
-    if (!email || !password) {
-      res.status(400).json({ error: "Email and password are required." });
+    if (!parsedParams.success) {
+      res.status(400).json({
+        error: "Validation error",
+        details: parsedParams.error.format(),
+      });
       return;
     }
+
+    const { email, password } = parsedParams.data;
 
     const user = await authService.findUserByEmail(email);
     if (!user) {
@@ -72,7 +82,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
+    logger.error(error, "Login failed");
     res.status(500).json({ error: "Internal server error" });
   }
 };
