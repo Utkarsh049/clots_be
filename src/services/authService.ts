@@ -25,6 +25,12 @@ export const findUserByEmail = async (email: string) => {
   });
 };
 
+export const findUserById = async (id: string) => {
+  return await prisma.user.findUnique({
+    where: { id },
+  });
+};
+
 export const generateToken = (userId: string) => {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };

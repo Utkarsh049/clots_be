@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import * as authService from "../services/authService.js";
 import { signupSchema, loginSchema } from "../validation/authValidation.js";
+import type { AuthRequest } from "../middleware/authMiddleware.js";
 import logger from "../utils/logger.js";
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
@@ -83,6 +84,36 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     logger.error(error, "Login failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getProfile = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const user = await authService.findUserById(userId);
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    res.status(200).json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+    });
+  } catch (error) {
+    logger.error(error, "Get profile failed");
     res.status(500).json({ error: "Internal server error" });
   }
 };

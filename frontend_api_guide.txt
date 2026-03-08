@@ -196,3 +196,4 @@ Base Path: `/upload`
   }
   ```
 *(You can use this `imageUrl` when creating/updating a Note)*
+$2b$10$bHpD1wV/c9UVzFOFTRn.8e8bzy2JxGcf/W7hdbrEwqf7F0wHp6pHW
