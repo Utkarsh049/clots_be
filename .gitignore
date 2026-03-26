@@ -5,3 +5,4 @@ node_modules
 /generated/prisma
 
 db.js
+frontend_api_guide.txt

@@ -129,17 +129,14 @@ Whenever a single Note is returned (create, get by id, update), it will have thi
 - **Success Response (200 OK):** Returns the updated Note Object JSON.
 
 ### 2.5 Delete Note (`DELETE /notes/:id`)
-- **Success Response (200 OK):**
-  ```json
-  { "message": "Note deleted successfully" }
-  ```
+- **Success Response (204 No Content):** Empty body.
 
 ---
 
 ## 3. Search & Tags (Under Notes)
 **Authorization:** Requires `Authorization: Bearer <token>`
 
-### 3.1 Search Notes (`GET /notes/search?query=react`)
+### 3.1 Search Notes (`GET /notes/search?q=react`)
 Returns notes where the query string matches the title, content, or any tag name.
 - **Success Response (200 OK):**
   `[ /* Array of Note Objects */ ]`
@@ -156,27 +153,34 @@ Base Path: `/share` | `/notes/:id/share`
 
 ### 4.1 Enable Sharing (`POST /notes/:id/share`)
 *(Requires Auth)*
-- **Success Response (200 OK):**
-  ```json
-  {
-    "message": "Note visibility updated",
-    "note": { ... Note Object ..., "isPublic": true, "shareId": "public-uuid-string" }
-  }
-  ```
+- **Success Response (200 OK):** Returns the updated Note Object JSON (`isPublic` becomes `true`).
 
 ### 4.2 Disable Sharing (`DELETE /notes/:id/share`)
 *(Requires Auth)*
-- **Success Response (200 OK):**
-  ```json
-  {
-    "message": "Note visibility updated",
-    "note": { ... Note Object ..., "isPublic": false }
-  }
-  ```
+- **Success Response (200 OK):** Returns the updated Note Object JSON (`isPublic` becomes `false`).
 
 ### 4.3 View Shared Note (`GET /share/:shareId`)
 *(NO Auth Required! Use the `shareId`, NOT the `id`)*
-- **Success Response (200 OK):** Returns the Note Object JSON.
+- **Success Response (200 OK):** Returns public note payload:
+  ```json
+  {
+    "title": "My Note Title",
+    "content": "The actual text content of the note",
+    "imageUrl": "https://...", // or null
+    "createdAt": "2024-03-07T10:00:00.000Z",
+    "tags": [
+      {
+        "noteId": "note-uuid",
+        "tagId": "tag-uuid",
+        "tag": {
+          "id": "tag-uuid",
+          "name": "React",
+          "slug": "react"
+        }
+      }
+    ]
+  }
+  ```
 - **Error Response:** `404 Not Found` (if note doesn't exist or is not public)
 
 ---
@@ -196,4 +200,3 @@ Base Path: `/upload`
   }
   ```
 *(You can use this `imageUrl` when creating/updating a Note)*
-$2b$10$bHpD1wV/c9UVzFOFTRn.8e8bzy2JxGcf/W7hdbrEwqf7F0wHp6pHW
