@@ -6,3 +6,5 @@ node_modules
 
 db.js
 frontend_api_guide.txt
+
+dist
